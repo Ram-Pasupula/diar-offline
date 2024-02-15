@@ -1,0 +1,11 @@
+pyannote.audio==3.1
+pyannote.algorithms
+pyannote.core
+pyannote.database
+pyannote.metrics
+pyannote.parser
+pyannote.pipeline
+transformers
+torch
+torchaudio
+ffmpeg
