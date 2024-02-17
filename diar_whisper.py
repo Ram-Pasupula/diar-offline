@@ -1,6 +1,10 @@
 import locale
-def getpreferredencoding(do_setlocale = True):
+
+
+def getpreferredencoding(do_setlocale=True):
     return "UTF-8"
+
+
 locale.getpreferredencoding = getpreferredencoding
 
 
@@ -12,9 +16,10 @@ import subprocess
 import torch
 import pyannote.audio
 from pyannote.audio.pipelines.speaker_verification import PretrainedSpeakerEmbedding
+
 embedding_model = PretrainedSpeakerEmbedding(
-    "speechbrain/spkrec-ecapa-voxceleb",
-    device=torch.device("cpu"))
+    "speechbrain/spkrec-ecapa-voxceleb", device=torch.device("cpu")
+)
 
 from pyannote.audio import Audio
 from pyannote.core import Segment

@@ -15,7 +15,6 @@ pipeline = Pipeline.from_pretrained(
 pipeline = DiarizationPipeline(
    diarization_pipeline=pipeline
 )
-
 segments = pipeline("audio.wav")
 
 print(segments)

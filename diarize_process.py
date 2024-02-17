@@ -24,9 +24,11 @@ class DiarizationPipeline:
         **kwargs,
     ):
         kwargs_diarization = {
-            argument[len("diarization_") :]: value for argument, value in kwargs.items() if argument.startswith("diarization_")
+            argument[len("diarization_") :]: value
+            for argument, value in kwargs.items()
+            if argument.startswith("diarization_")
         }
-        
+
         inputs, diarizer_inputs = self.preprocess(inputs)
 
         diarization = self.diarization_pipeline(
@@ -36,9 +38,13 @@ class DiarizationPipeline:
 
         segments = []
         for segment, track, label in diarization.itertracks(yield_label=True):
-            segments.append({'segment': {'start': segment.start, 'end': segment.end},
-                             'track': track,
-                             'label': label})
+            segments.append(
+                {
+                    "segment": {"start": segment.start, "end": segment.end},
+                    "track": track,
+                    "label": label,
+                }
+            )
 
         # diarizer output may contain consecutive segments from the same speaker (e.g. {(0 -> 1, speaker_1), (1 -> 1.5, speaker_1), ...})
         # we combine these segments to give overall timestamps for each speaker's turn (e.g. {(0 -> 1.5, speaker_1), ...})
@@ -53,7 +59,10 @@ class DiarizationPipeline:
                 # add the start/end times for the super-segment to the new list
                 new_segments.append(
                     {
-                        "segment": {"start": prev_segment["segment"]["start"], "end": cur_segment["segment"]["start"]},
+                        "segment": {
+                            "start": prev_segment["segment"]["start"],
+                            "end": cur_segment["segment"]["start"],
+                        },
                         "speaker": prev_segment["label"],
                     }
                 )
@@ -62,12 +71,15 @@ class DiarizationPipeline:
         # add the last segment(s) if there was no speaker change
         new_segments.append(
             {
-                "segment": {"start": prev_segment["segment"]["start"], "end": cur_segment["segment"]["end"]},
+                "segment": {
+                    "start": prev_segment["segment"]["start"],
+                    "end": cur_segment["segment"]["end"],
+                },
                 "speaker": prev_segment["label"],
             }
         )
 
-        return new_segments 
+        return new_segments
 
     # Adapted from transformers.pipelines.automatic_speech_recognition.AutomaticSpeechRecognitionPipeline.preprocess
     # (see https://github.com/huggingface/transformers/blob/238449414f88d94ded35e80459bb6412d8ab42cf/src/transformers/pipelines/automatic_speech_recognition.py#L417)
@@ -86,7 +98,9 @@ class DiarizationPipeline:
 
         if isinstance(inputs, dict):
             # Accepting `"array"` which is the key defined in `datasets` for better integration
-            if not ("sampling_rate" in inputs and ("raw" in inputs or "array" in inputs)):
+            if not (
+                "sampling_rate" in inputs and ("raw" in inputs or "array" in inputs)
+            ):
                 raise ValueError(
                     "When passing a dictionary to ASRDiarizePipeline, the dict needs to contain a "
                     '"raw" key containing the numpy array representing the audio and a "sampling_rate" key, '
@@ -101,12 +115,18 @@ class DiarizationPipeline:
             in_sampling_rate = inputs.pop("sampling_rate")
             inputs = _inputs
             if in_sampling_rate != self.sampling_rate:
-                inputs = F.resample(torch.from_numpy(inputs), in_sampling_rate, self.sampling_rate).numpy()
+                inputs = F.resample(
+                    torch.from_numpy(inputs), in_sampling_rate, self.sampling_rate
+                ).numpy()
 
         if not isinstance(inputs, np.ndarray):
-            raise ValueError(f"We expect a numpy ndarray as input, got `{type(inputs)}`")
+            raise ValueError(
+                f"We expect a numpy ndarray as input, got `{type(inputs)}`"
+            )
         if len(inputs.shape) != 1:
-            raise ValueError("We expect a single channel audio input for ASRDiarizePipeline")
+            raise ValueError(
+                "We expect a single channel audio input for ASRDiarizePipeline"
+            )
 
         # diarization model expects float32 torch tensor of shape `(channels, seq_len)`
         diarizer_inputs = torch.from_numpy(inputs).float()

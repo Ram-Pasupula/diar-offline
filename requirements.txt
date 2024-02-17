@@ -9,3 +9,6 @@ transformers
 torch
 torchaudio
 ffmpeg
+fastapi
+uvicorn
+python-multipart
